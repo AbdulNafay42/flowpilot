@@ -1,0 +1,105 @@
+@import "tailwindcss";
+
+@import "@fontsource-variable/inter";
+@import "@fontsource-variable/plus-jakarta-sans";
+
+/* Design tokens, taken from the Figma file (Flow-Pilot). */
+@theme {
+  --color-brand: #2f5bff;
+  --color-brand-end: #7b4dff;
+  --color-brand-contrast: #ffffff;
+  --color-ink: #101828;
+  --color-muted: #667085;
+  --color-subtle: #98a2b3;
+  --color-surface: #ffffff;
+  --color-surface-alt: #f6f8fc;
+  --color-tint: #eef3ff;
+  --color-tint-strong: #eaf0ff;
+  --color-track: #eef2ff;
+  --color-line: #dce3f0;
+  --color-line-soft: #eef1f5;
+  --color-logo: #7a879b;
+  --color-success: #22b573;
+  --color-warning: #ff9f43;
+  --color-gold: #f7b500;
+  --color-danger: #b91c1c;
+  --color-tile-violet: #8a5cff;
+  --color-tile-orange: #ff9f43;
+  --color-hero-from: #f2f6ff;
+  --color-hero-to: #f6f1ff;
+  --color-stat:  #fbfcfe;
+  --color-task-box: #f1f5ff;
+  --color-checkbox: #6b7280;
+  --color-menu-ink: #1e293b;
+  --color-menu-line: #e2e8f0;
+  --color-menu-icon: #94a3b8;
+  --color-menu-from: #5b47fb;
+  --color-menu-to: #4f46e5;
+
+  --font-sans: "Inter Variable", system-ui, sans-serif;
+  --font-menu: "Plus Jakarta Sans Variable", "Inter Variable", system-ui, sans-serif;
+
+  --shadow-card: 0 0.625rem 2.25rem 0 rgb(29 42 87 / 0.1);
+  --shadow-soft: 0 0.625rem 1.125rem 0 rgb(29 42 87 / 0.1);
+  --shadow-btn: 0 0.0625rem 0.0625rem 0 rgb(0 0 0 / 0.05);
+
+  --breakpoint-xs: 30rem;
+}
+
+@utility bg-brand-gradient {
+  background-image: linear-gradient(to right, var(--color-brand), var(--color-brand-end));
+}
+
+/* Horizontal scrollers (mobile pricing, tab row): keep swipe/scroll, hide the bar. */
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@utility bg-soft-gradient {
+  background-image: linear-gradient(to right, var(--color-hero-from), var(--color-hero-to));
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Offset anchor targets so the sticky header does not cover them. */
+section[id] {
+  scroll-margin-top: 4.75rem;
+}
+
+body {
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* Terms checkbox: white box, blue with the Figma tick when checked. */
+.check-input {
+  appearance: none;
+  border: 1px solid var(--color-checkbox);
+  border-radius: 0.25rem;
+  background-color: var(--color-surface);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100%;
+  cursor: pointer;
+}
+.check-input:checked {
+  border-color: transparent;
+  background-color: var(--color-brand);
+  background-image: url("./assets/icons/checkbox-tick.svg");
+}
+.check-input:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+}
