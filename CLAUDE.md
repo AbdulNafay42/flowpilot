@@ -58,7 +58,7 @@ Section ids (anchor targets): `top` (Hero), `features`, `how-it-works`, `testimo
 
 ## Current status
 Design integrated from Figma (file key WAHeIX5DCB0FAYZ2lOcr6d): tokens, Inter font, Button, Header + full-screen mobile menu, Hero + DashboardMockup (working sidebar tabs), TrustedCompanies, Features/FeatureCard, FeatureTabs, TestimonialSlider (sliding track, swipe on mobile, arrows/dots from 768px), Pricing (working Monthly/Yearly toggle), ContactForm (mobile follows the Figma 375 reference; rules unchanged), Footer. 23 tests passing; build passes; lint has the one RHF `watch()` warning. Sizes are in rem (no px arbitrary values; 1px borders and 2px outlines excepted).
-Open: Automate/Collaborate copy and testimonials 2-3 are sample text documented as assumptions in the README; yearly prices, dashboard non-Overview panels, footer social links/targets are `TODO(figma)` in `src/data`; the brief's footer description/social links are not shown; AI-USAGE.md is a draft the candidate must review and finish (the three agent roles were run after the build, see that file). See README "Brief vs Figma" and "Assumptions" for the documented conflicts.
+Open: Automate/Collaborate copy and testimonials 2-3 are sample text documented as assumptions in the README; yearly prices, dashboard non-Overview panels, footer social links/targets are `TODO(figma)` in `src/data`; the brief's footer description/social links are not shown; AI-USAGE.md is complete except the candidate's own reason for their decision (the three agent roles were run after the build, see that file). See README "Brief vs Figma" and "Assumptions" for the documented conflicts.
 
 ## Working rules
 - Verify by running tests/build and inspecting behavior; do not claim correctness without it.

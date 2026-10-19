@@ -64,4 +64,3 @@ These texts are **not** confirmed design content; replace them when real copy ex
 - At a root font size of 112.5% or more, the desktop hero layout (1024 to about 1100px wide) overflows horizontally because the left column and dashboard card have fixed rem widths.
 - Footer links and the mobile menu toggle are small touch targets (16px / 34px tall).
 - Visual comparison was done by eye and by measuring in headless Chrome at 375, 768, 1024 and 1440 (and 320/360 for small phones); no automated visual diff, no real-device or screen-reader testing.
-- `AI-USAGE.md` is a draft the candidate must review and rewrite in their own words.

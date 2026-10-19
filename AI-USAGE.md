@@ -107,10 +107,6 @@ were showing but Team Size said "Select team size". Claude found that the mobile
 resizing the window afterwards left the field empty. Now the default follows the screen size until I pick a value myself.
 There is a new unit test for it. Claude could not reproduce the resize in headless Chrome, so the unit test is the proof.
 
-TODO: the foundation notes mention an earlier Vitest error ("Cannot find native binding", fixed by deleting `node_modules`
-and `package-lock.json` and reinstalling). I did not see that in this session. Keep it only if I remember it, and add the
-prompt I used. Otherwise delete this line.
-
 ## Where Claude helped most
 
 Claude read the Figma file directly and turned the sizes into Tailwind classes. It also measured the real layout in headless
@@ -118,17 +114,9 @@ Chrome (positions, section heights, overflow) instead of guessing from screensho
 responsive layout, accessibility and the form. It was less reliable on details only I knew, like which screen size a spacing
 change was for, so those needed a short follow-up each time.
 
-TODO: confirm this matches my own view of where it helped most.
-
 ## A decision I made myself
 
-These were my choices during the project:
+**Removing the footer description.** The brief lists a short description in the footer, but the Figma design has only the
+logo, copyright and Privacy/Terms/Security links. I told Claude to remove the description so the footer matches Figma. The
+README records this as a conflict between the brief and Figma.
 
-- Remove the footer description, even though the brief lists one (the Figma design does not have it).
-- Make the Yearly pricing toggle work, although the brief says monthly only for this handoff.
-- No arrows or dots on mobile testimonials, with swipe only.
-- Convert pixel values to rem so the page scales with the browser font size.
-- 17px side margin on the hero on mobile only.
-
-TODO: pick the one decision I want to highlight and write my own reason in one or two sentences. The reasons above are not
-written down by me yet.
