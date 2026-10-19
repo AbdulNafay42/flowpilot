@@ -1,156 +1,134 @@
 # AI Usage
 
-> **How the work was done.** I directed Claude Code step by step with my own prompts, one section or one fix at a
-> time (examples below), and checked the results in the browser. For the final fix-up batch I also had three
-> separate Claude agents (planner, implementer, reviewer) run; I asked for that, and the lead session wrote their
-> briefs from my instructions. That is recorded under "Agents / roles". Review the wording and correct anything that
-> does not match what you remember before submitting.
+I built the FlowPilot page with Claude Code. I worked in small steps: one section or one fix per prompt, then I checked
+the result in the browser and in DevTools. I used my own prompts for almost all of the work. For the last round of
+fixes I also asked for three separate Claude agents (planner, implementer, reviewer). The prompts for those three agents
+were written by Claude Code from my instructions, not by me. I say clearly below which is which.
 
 ## Agents / roles
 
-**Honest status.** Most of the build (Figma inspection, layout, form, carousel, rem conversion) happened in one
-Claude Code session, with the model switching between planning, implementing and reviewing as the conversation
-needed. At the end, the remaining batch of work was run through three **separate** Claude agents, one per role,
-each starting with no memory of the others except what was written in its prompt. They ran **after** the page was
-built, so the Planner planned the fix-up batch, not the original build.
-
-| Role | Responsibility |
+| Role | Job |
 |---|---|
-| Project Planner | Read the brief and Figma, split the page into components, find reuse, order the work, flag risks. No code. |
-| Frontend Implementation Agent | Build one section at a time (React, TypeScript, Tailwind, React Hook Form), with state, validation and responsive behaviour. |
-| Reviewer / QA Agent | Independently review the finished work: responsiveness, accessibility, React structure, TypeScript, validation, interactions, maintainability, bugs. Reports only, does not edit. |
+| Project Planner | Read the open issues, plan the work in order, flag risks. Writes no code. |
+| Frontend Implementation Agent | Make the changes (React, TypeScript, Tailwind) and measure the result. |
+| Reviewer / QA Agent | Review the finished code independently. Reports only, edits nothing. |
 
-### What was actually run (3 separate agents, on the QA fix-up batch)
+Most of the build (Figma, layout, form, carousel, rem conversion) happened in one Claude Code session. The three agents
+ran at the end, after the page was built, so the planner planned the fix-up round, not the first build. Each agent started
+with no memory except its prompt.
 
-| Role | Prompt (written by Claude Code, project-specific) | What it returned | What I (the lead session) did with it |
-|---|---|---|---|
-| Project Planner (read-only) | Four open items from the QA report with file names, constraints (desktop must not change, no invented Figma values, sample copy must be documented as an assumption) and a request for an ordered plan with risks and verification per item. | A numbered plan: Pricing tablet fix (`md:items-stretch lg:items-start`, button `md:mt-4 lg:mt-0`), sample copy proposals, footer overflow fix, docs update. It said itself it had not opened the slider or tabs files. | Used the plan, told the Implementation agent to verify the slider/tabs parts itself. Its open questions were answered by me (16px tablet gap accepted, invented names allowed if documented). |
-| Frontend Implementation | The plan, the exact sample copy, the rem rule, "do not touch README/CLAUDE.md", and a list of measurements it must report. | Changed `Pricing.tsx`, `Footer.tsx`, `testimonials.ts`, `tabs.ts`; reported heights/gaps at 768/800/1000, desktop unchanged, footer scrollWidth at 125% font, tests 18/18. | I re-measured its key claims in headless Chrome myself before accepting them (pricing 316px equal heights and gaps 48/16/36 at 768; desktop 302px and offsets unchanged; footer no overflow). They matched. |
-| Reviewer / QA (read-only) | "You did not write this code, report only", the brief, the check list (responsive, a11y, React hooks, validation, tests meaningful, docs match), and the requirement to run tsc/tests/build/lint and drive a browser. | 11 findings: menu not a dialog and page not inert; mobile testimonials unreachable by keyboard; no `onTouchCancel`; hero overflows at 125% font on 1024-1100px; whitespace-only name/message passes; double-submit early-return bug; no `aria-required`; a leftover px value; weak slider test; missing validation tests; stale CLAUDE.md. | Fixed: dialog + inert page, `onTouchCancel`, trim validation, form-level double-submit guard, `aria-required`, the px value, the weak slider test, new tests (18 -> 23), stale docs. Not fixed, documented in the README: mobile testimonial keyboard access (you asked for no mobile controls) and the hero overflow at large font sizes. |
+**Initial prompts (written by Claude Code, shortened).** Each opening is quoted as sent:
 
-Evidence that the Reviewer was independent and not just agreeing: it found real defects in code the lead session had
-written and "verified" (for example the early-return that re-enabled the button during a repeated submit).
+- Planner: "Role: Project Planner for a junior-level React landing page (FlowPilot). You must NOT write or edit any files;
+  this is a planning-only task." It listed four open items from my QA report, the constraints (desktop must not change, no
+  invented Figma values), and asked for a numbered plan with risks and how to verify each item.
+- Implementer: "Role: Frontend Implementation Agent for the FlowPilot landing page ... Rules: use only the existing stack;
+  style with the design tokens in src/index.css; sizes are in rem ...; do not touch anything outside the three tasks below."
+  It ended with "VERIFY everything yourself, do not just claim it" and a list of measurements to report.
+- Reviewer: "Role: independent Reviewer / QA agent. You did not write this code. REPORT ONLY ..." plus the brief, a check
+  list (responsive, accessibility, hooks, validation, tests, docs) and "Run for real, do not trust claims".
 
-### Generic role prompt templates (reusable)
+**What each agent did**
 
-### Draft prompt: Project Planner (template)
-```
-Role: Project Planner for a junior-level React landing page (FlowPilot).
-Context: Stack is fixed: React 19, TypeScript, Tailwind CSS 4, React Hook Form, React Testing Library (Vitest).
-The assessment brief (attached) is the source of truth for behaviour; the Figma file (link) is the source of
-truth for visuals. Figma has a 1440 desktop page, 375 mobile references and a mobile menu; I must decide
-responsive behaviour for the rest.
-Task: 1) List the page sections and the components you would create, and which are reusable.
-2) Propose an order of work in small steps (no "build everything" step). 3) List risks and open questions,
-especially where the brief and Figma disagree.
-Requirements: do not write code. Do not invent content or design values: mark unknowns as questions.
-Output: a numbered plan, a component tree, and a risks/questions list.
-```
+| Role | Result | What I did with it |
+|---|---|---|
+| Planner | A numbered plan: tablet pricing fix (`md:items-stretch lg:items-start`, button `md:mt-4 lg:mt-0`), sample copy, footer overflow fix, docs update. It said it had not opened the slider and tabs files. | Claude Code (the lead session) used the plan and told the implementer to check those two files itself. It accepted a 16px tablet gap and invented sample names, as long as they are documented. |
+| Implementer | Changed `Pricing.tsx`, `Footer.tsx`, `testimonials.ts`, `tabs.ts` and reported its measurements. | Claude Code re-measured its main claims in headless Chrome before accepting them: at 768px all pricing cards were 316px tall with gaps of 48/16/36px; desktop stayed 302px with the same offsets; the footer no longer overflowed. They matched. |
+| Reviewer | 11 findings, for example: the mobile menu was not a dialog and the page behind it was not inert; no `onTouchCancel` on the slider; whitespace-only name and message passed; the double-submit guard returned early and re-enabled the button; no `aria-required`; a leftover px value; a weak slider test; missing validation tests; stale `CLAUDE.md`. | Claude Code fixed these and added tests (18 to 23). Not fixed, documented in the README: mobile testimonials cannot be changed by keyboard (I asked for no mobile controls), and the hero overflows at large browser font sizes. |
 
-### Draft prompt: Frontend Implementation Agent (template)
-```
-Role: Frontend implementation agent for the FlowPilot project.
-Context: <paste the planner's plan, the section's Figma measurements, and the relevant files>.
-Rules: use only the existing stack; style with the design tokens in src/index.css; content comes from typed
-arrays in src/data; mobile-first with breakpoints at 768 and 1024; real <label>s, visible focus states.
-Task: implement ONLY <one section>. Include its state/validation and add or update tests.
-Output: the changed files and a short note of any assumption. Mark unknown design values TODO(figma).
-```
-
-### Draft prompt: Reviewer / QA Agent (template)
-```
-Role: independent reviewer. You did not write this code.
-Task: review <section/diff> for responsiveness at 375/768/1440, accessibility (headings, labels, focus, keyboard,
-contrast), React structure, TypeScript, form validation and obvious bugs. Run the app and the tests; do not
-trust claims of correctness.
-Rules: report only, make no changes. Rank findings by severity and give evidence (measurement, console output
-or a reproduction) for each.
-Output: a findings table: severity, where, what happened, evidence, suggested fix.
-```
+The reviewer was useful because it found real bugs in code that the first session had written and "checked", like the
+early return in the submit guard.
 
 ## Strong prompt and why it worked
 
-*What actually happened.* The prompt that started the Figma work was:
+This is the prompt I used to start the Figma work (my own):
 
-> "Try accessing this file and inspect the actual design, including frames, styles, typography, spacing,
-> components, and responsive layouts. If access works, compare the design with our existing implementation and
-> identify the remaining changes. If access fails, report the exact blocker. Do not guess design details or
-> modify the code until you have inspected the design successfully."
+> "Try accessing this file and inspect the actual design, including frames, styles, typography, spacing, components, and
+> responsive layouts. If access works, compare the design with our existing implementation and identify the remaining
+> changes. If access fails, report the exact blocker. Do not guess design details or modify the code until you have
+> inspected the design successfully."
 
-Why it worked: it gave a clear task, named what to inspect, defined success and failure paths, and forbade
-guessing and editing before inspection. The first attempt failed on file permissions; Claude reported the exact error
-instead of inventing a design, and after access was fixed it listed the real differences before any code changed.
+It worked because it gave one clear task, said what to inspect, and covered both the success case and the failure case. It
+also said not to guess and not to edit before looking. The first try failed on file permissions. Claude reported the exact
+error and did not invent a design. After I fixed access it listed the real differences before changing any code.
 
 ## Weak prompt and improved version
 
-*Weak (real):* "make button 19.5px". It could mean height, font size, padding, line-height or margin, and it did
-not say which button or which screen size. Claude had to stop and ask.
+**Example 1 (hero layout, both prompts are mine).**
 
+- Weak: "Use a parent container with `height: 100%` and `display: flex; flex-direction: column; justify-content: space-between`
+  ... Ensure the parent takes the full available height of the left Hero section."
+  I chose the mechanism (`height: 100%`), and it cannot work when the parent only has a `min-height`. The column stayed at
+  its content height (491px in DevTools) and the badge and trust notes did not move apart. I asked why it was not filling
+  the section.
+- Improved: "Left section must stretch to fill 100% of the available parent content height using flexbox stretching, not
+  `h-full` or `height: 100%` ... Use the parent's flex/grid alignment instead of percentage heights that depend on an
+  explicitly defined parent height."
+  This named the cause and the mechanism to use. It was fixed in one step with `items-stretch` and no `h-full`. It was checked
+  by forcing the section taller and watching the column grow.
 
-*Second weak/improved pair (my own prompts, same layout problem).*
+**Example 2 (pricing button).**
 
-- **Weak (mine):** "Use a parent container with `height: 100%` and `display: flex; flex-direction: column; justify-content: space-between`... Ensure the parent takes the full available height of the left Hero section". I specified a mechanism (`height: 100%`) that cannot work when the parent only has a `min-height`: the column stayed at its content height and the badge and trust notes did not move apart. I found this by inspecting the element in DevTools (it showed `height: 100%` and 491px) and asked why it was not filling the section.
-- **Improved (mine):** "Left section must stretch to fill 100% of the available parent content height using flexbox stretching, not `h-full` or `height: 100%`... Use the parent's flex/grid alignment instead of percentage heights that depend on an explicitly defined parent height." This named the cause and the mechanism to use, and it was fixed in one step with `items-stretch` and no `h-full`; verified by forcing the section taller and watching the column grow.
+- Weak: "make button 19.5px". It could mean height, font size, padding, line-height or margin, and it did not say which
+  button or which screen size. Claude had to ask.
+- Improved: "on mobile make button 19.5px margin top". This names the property and the breakpoint, and the pricing "Get Started"
+  buttons were changed in one step.
 
-*Improved (what was then sent):* "on mobile make button 19.5px margin top", which names the property and the
-breakpoint. The pricing "Get Started" buttons were changed in `Pricing.tsx` in one step.
+**Lesson:** tell Claude the goal and the screen size, and do not choose a CSS mechanism unless I am sure it works.
 
-## Claude recommendation rejected or modified
+## Claude recommendation I rejected or changed
 
-*Testimonial swipe on mobile.* Claude's first version only swapped the visible card when you swiped (all cards
-stacked in one place, the others hidden). You tested it and said it "doesn't feel like cards are swapping, only
-the content". Claude's version met the brief but was not the carousel behaviour you wanted, so it was rebuilt:
-the cards now sit on a track that follows your finger while dragging and slides to the next card on release,
-with resistance at the first and last card. It was verified with synthetic touch events in headless Chrome and a
-unit test.
+**Testimonial swipe on mobile.** Claude's first version only swapped the visible card on swipe (all cards were stacked in one
+place and the others hidden). I tested it and said it did not feel like the cards were swapping, only the content. It met the
+brief but it was not the carousel I wanted, so it was rebuilt. The cards now sit on a track that follows my finger and
+slides to the next card on release, with resistance at the first and last card. It was checked with synthetic touch events in
+headless Chrome and a unit test (not on a real phone).
 
-*Other modifications worth mentioning:* Claude first made the pricing Yearly button disabled (the brief says
-monthly only). You wanted it to work, so a working toggle was added with placeholder yearly prices (monthly x 12),
-clearly marked `TODO(figma)`.
+**Yearly pricing.** Claude first made the Yearly button disabled because the brief says monthly only. I wanted the toggle to
+work, so Claude added a working toggle with placeholder yearly prices (monthly x 12), marked `TODO(figma)`.
 
 ## Debugging example
 
-**Problem.** After pressing "Send Message" in a browser test, the button never showed "Submitting…": it went from
-"Send Message" straight to the success message about one second later.
+**Submit state looked missing.**
 
-**Expected.** The button is disabled and reads "Submitting…" for about one second, then the success text appears
-(brief, section 7).
+- Expected: after "Send Message" the button is disabled and shows "Submitting…" for about one second, then the success text
+  appears (brief, section 7).
+- Actual at first: in Claude's browser test the button still read "Send Message" and was enabled 60ms after the click, and the
+  success text appeared at about 1020ms.
+- Evidence: the unit test for the submitting state passed. A finer timeline (every 10ms, button queried again each time) in
+  both the dev build and the production build showed "Submitting… [disabled]" at 10ms and success at about 1042ms.
+- Cause and fix: there was no bug in the form. The first test script most likely read an old button reference. No code
+  change was needed.
+- Prompt: Claude found this on its own while doing the QA I asked for ("make a complete qa of mobile and desktop, and
+  generate report, dont make any changes"). It was not a separate debugging prompt from me.
 
-**Actual (first reading).** The button still read "Send Message" and was enabled 60ms after the click.
+**Team Size was not preselected on a phone-sized screen.** I sent a screenshot with "fix the ui". The mobile placeholders
+were showing but Team Size said "Select team size". Claude found that the mobile default was chosen once at page load, so
+resizing the window afterwards left the field empty. Now the default follows the screen size until I pick a value myself.
+There is a new unit test for it. Claude could not reproduce the resize in headless Chrome, so the unit test is the proof.
 
-**Evidence inspected.**
-1. The unit test (`disables submit while processing, then shows success`) passed.
-2. The sampled browser timeline showed "Send Message [enabled]" at 60ms and success at about 1020ms.
-3. A finer timeline (every 10ms, button re-queried each time) in both the dev build and the production build showed
-   "Submitting… [disabled]" at 10ms and success at about 1042ms.
-
-**Claude prompt.** "The submitting state appears to be missing in the browser, check with finer sampling in both
-dev and production builds."
-
-**Cause and fix.** There was no bug in the form: the first test script kept a reference to the button element
-from before the click and read stale values. No code change was needed. **Verification:** fresh element queries
-every 10ms, in both builds, plus the existing test.
-
-**Second, real bug found by the same kind of check.** Team Size was not preselected on a phone-sized screen:
-the mobile default was chosen once at page load, so resizing after load left it empty while the placeholders
-changed. Fix: the default now follows the screen size until the user picks a value, covered by a new test.
-
-*(Earlier candidate from the foundation work: Vitest failing with "Cannot find native binding"; the fix was to delete
-`node_modules` and `package-lock.json` and reinstall. Add the prompt you used, if you want to use this one instead.)*
+TODO: the foundation notes mention an earlier Vitest error ("Cannot find native binding", fixed by deleting `node_modules`
+and `package-lock.json` and reinstalling). I did not see that in this session. Keep it only if I remember it, and add the
+prompt I used. Otherwise delete this line.
 
 ## Where Claude helped most
 
-*Draft, check and edit this to match your experience.* Reading the Figma file directly (frames, text, spacing) and
-turning the numbers into Tailwind classes; measuring the real layout in headless Chrome (element positions, section
-heights, overflow) instead of judging by eye; and the repeatable QA scripts for responsive, accessibility and form
-checks. Claude was less reliable on layout details that only exist in your head, such as which breakpoint a
-spacing change was meant for. Those needed a short follow-up each time.
+Claude read the Figma file directly and turned the sizes into Tailwind classes. It also measured the real layout in headless
+Chrome (positions, section heights, overflow) instead of guessing from screenshots, and wrote repeatable checks for
+responsive layout, accessibility and the form. It was less reliable on details only I knew, like which screen size a spacing
+change was for, so those needed a short follow-up each time.
+
+TODO: confirm this matches my own view of where it helped most.
 
 ## A decision I made myself
 
-*Pick the ones that are true for you and say why.* Decisions made during the project:
-- Removing the footer description even though the brief lists one (the design does not have it).
-- Making the pricing Yearly toggle work although the brief scopes this handoff to monthly.
-- Keeping mobile testimonials as swipe-only, without arrows or dots, to match the Figma mobile frame.
-- Converting pixel values to rem so the page scales with the browser's font size.
-- Giving the hero 17px side margins on mobile only.
+These were my choices during the project:
+
+- Remove the footer description, even though the brief lists one (the Figma design does not have it).
+- Make the Yearly pricing toggle work, although the brief says monthly only for this handoff.
+- No arrows or dots on mobile testimonials, with swipe only.
+- Convert pixel values to rem so the page scales with the browser font size.
+- 17px side margin on the hero on mobile only.
+
+TODO: pick the one decision I want to highlight and write my own reason in one or two sentences. The reasons above are not
+written down by me yet.
