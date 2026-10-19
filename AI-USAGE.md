@@ -116,11 +116,7 @@ change was for, so those needed a short follow-up each time.
 
 ## A decision I made myself
 
-**Removing the footer description.** The brief lists a short description in the footer, but the Figma design has only the
-logo, copyright and Privacy/Terms/Security links. I told Claude to remove the description so the footer matches Figma. The
-README records this as a conflict between the brief and Figma.
+**Removing the footer description.** The brief lists a short description in the footer, but the Figma design does not have
+one. I told Claude to remove it. The README records this as a conflict between the brief and Figma.
 
-
-My reason: I followed the Figma design because it shows the footer with only the logo, copyright, and Privacy, Terms, and
-Security links. I didn't want to add extra text that wasn't in the design, so I removed the description and documented the
-difference in the README.
+My reason: I followed the Figma design because it shows the footer with only the logo, copyright, and Privacy, Terms, and Security links. I didn't want to add extra text that wasn't in the design, so I removed the description and documented the difference in the README.
